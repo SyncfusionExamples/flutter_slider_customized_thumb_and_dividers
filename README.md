@@ -1,0 +1,2 @@
+# flutter_slider_customized_thumb_and_dividers
+flutter_slider_customized_thumb_and_dividers
