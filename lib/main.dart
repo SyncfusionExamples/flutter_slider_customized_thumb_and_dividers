@@ -25,9 +25,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double _sliderValue = 6.0;
-  bool _active = false;
   final Color _activeColor = const Color.fromARGB(255, 157, 0, 255);
+  double _sliderValue = 6.0;
+  bool _isActive = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +49,16 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               if (value <= _sliderValue) {
                 _sliderValue = value as double;
-                _active = false;
+                _isActive = false;
               } else {
                 _sliderValue = value as double;
-                _active = true;
+                _isActive = true;
               }
             });
           },
           interval: 1,
           showDividers: true,
-          thumbShape: _RectThumbShape(_sliderValue, _activeColor, _active),
+          thumbShape: _RectThumbShape(_activeColor, _isActive),
           dividerShape: _DividerShape(_activeColor),
         ),
       ),
@@ -67,8 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class _DividerShape extends SfDividerShape {
-  Color activecolor;
-  _DividerShape(this.activecolor);
+  _DividerShape(this._activecolor);
+
+  final Color _activecolor;
 
   @override
   void paint(PaintingContext context, Offset center, Offset? thumbCenter,
@@ -101,17 +102,16 @@ class _DividerShape extends SfDividerShape {
         innerPath,
         Paint()
           ..isAntiAlias = true
-          ..color = isActive ? activecolor : Colors.white
+          ..color = isActive ? _activecolor : Colors.white
           ..style = PaintingStyle.fill);
   }
 }
 
 class _RectThumbShape extends SfThumbShape {
-  num sliderValue;
-  Color activecolor;
-  bool active;
+  _RectThumbShape(this._activecolor, this._isActive);
 
-  _RectThumbShape(this.sliderValue, this.activecolor, this.active);
+  final bool _isActive;
+  final Color _activecolor;
 
   @override
   void paint(PaintingContext context, Offset center,
@@ -134,14 +134,14 @@ class _RectThumbShape extends SfThumbShape {
         textDirection: textDirection,
         thumb: thumb);
 
-    final arrowPathright = Path()
+    final arrowPathRight = Path()
       ..moveTo(center.dx - 13, center.dy - 13) // Starting point (left side)
       ..lineTo(center.dx + 17, center.dy) // Tip of the arrow (right side)
       ..lineTo(center.dx - 13, center.dy + 13) // Bottom left corner
       ..lineTo(center.dx - 7, center.dy) // Middle left to complete the arrow
       ..close();
 
-    final arrowPathleft = Path()
+    final arrowPathLeft = Path()
       ..moveTo(
           center.dx + 13, center.dy - 13) // Starting point (top right side)
       ..lineTo(center.dx - 17, center.dy) // Tip of the arrow (left side)
@@ -149,27 +149,21 @@ class _RectThumbShape extends SfThumbShape {
       ..lineTo(center.dx + 7, center.dy) // Middle right to complete the arrow
       ..close();
 
-    context.canvas.drawCircle(
-        center,
-        25,
-        Paint()
-          ..color = activecolor
-          ..style = PaintingStyle.fill);
+    final Paint fillPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
 
-    if (active == true) {
-      context.canvas.drawPath(
-          arrowPathright,
-          Paint()
-            ..color = Colors.white
-            ..style = PaintingStyle.fill
-            ..strokeWidth = 2);
+    final Paint activePaint = Paint()
+      ..color = _activecolor
+      ..style = PaintingStyle.fill;
+
+    context.canvas.drawCircle(center, 25, activePaint);
+
+    if (_isActive) {
+      context.canvas.drawPath(arrowPathRight, fillPaint);
     } else {
-      context.canvas.drawPath(
-          arrowPathleft,
-          Paint()
-            ..color = Colors.white
-            ..style = PaintingStyle.fill
-            ..strokeWidth = 2);
+      context.canvas.drawPath(arrowPathLeft, fillPaint);
     }
   }
 }
